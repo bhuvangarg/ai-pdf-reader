@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>AI Book Reader</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lora:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+    <!-- ── Header ── -->
+    <div id="header">
+        <h1>📚 AI Book Reader</h1>
+        <div id="header-right">
+            <span id="header-page-info"></span>
+        </div>
+    </div>
+
+    <!-- ── Upload Section ── -->
+    <div id="upload-section">
+        <div id="upload-card">
+            <div id="upload-icon">📂</div>
+            <h2>Upload your book</h2>
+            <p>PDF format supported</p>
+            <div id="upload-row">
+                <input type="file" id="pdf-input" accept=".pdf">
+                <button onclick="uploadPDF()">Upload PDF</button>
+            </div>
+            <p id="upload-status"></p>
+            <p id="lang-status" style="color: #9b59b6; font-size: 13px; margin-top: 6px;"></p>
+        </div>
+    </div>
+
+    <!-- ── AI Introduction ── -->
+    <div id="intro-section" style="display:none">
+        <div id="intro-inner">
+            <button id="intro-btn" onclick="getIntroduction()">🧠 Get AI Introduction</button>
+            <div id="intro-box" style="display:none">
+                <h3>📖 About This Book</h3>
+                <p id="intro-text"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Main App Layout ── -->
+    <div id="app-layout" style="display:none">
+
+        <!-- ── LEFT: Reader Panel ── -->
+        <div id="reader-panel">
+
+            <!-- Top Bar -->
+            <div id="top-bar">
+
+                <!-- Left: Page info + Progress -->
+                <div id="top-bar-left">
+                    <span id="page-info">Page 1</span>
+                    <div id="progress-container">
+                        <div id="progress-bar"></div>
+                        <span id="progress-text">0%</span>
+                    </div>
+                </div>
+
+                <!-- Right: Controls -->
+                <div id="top-bar-right">
+                    <button class="btn-icon" onclick="resetApp()">🔄 New Book</button>
+
+                    <div id="reading-modes">
+                        <button onclick="setReadingMode('study')">🎓 Study</button>
+                        <button onclick="setReadingMode('listen')">🎧 Listen</button>
+                        <button onclick="setReadingMode('focus')">🔍 Focus</button>
+                    </div>
+
+                    <!-- Bookmark icon -->
+                    <button class="btn-icon" onclick="bookmarkPage()" title="Bookmark this page">🔖</button>
+
+                    <!-- Bookmark dropdown -->
+                    <div class="bookmark-wrapper">
+                        <button class="btn-icon" onclick="toggleBookmarks()" title="View bookmarks">📖</button>
+                        <div id="bookmark-dropdown" class="dropdown hidden">
+                            <div class="dropdown-title">📖 Bookmarks</div>
+                            <ul id="bookmark-list"></ul>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Bookmark status -->
+            <p id="bookmark-status"></p>
+
+            <!-- ── Zoom Controls (replaces Font Controls) ── -->
+            <div id="zoom-controls">
+                <div class="zoom-control-item">
+                    <label title="Zoom page">🔍 Zoom</label>
+                    <input
+                        type="range"
+                        id="zoom-slider"
+                        min="50"
+                        max="200"
+                        step="5"
+                        value="100"
+                        oninput="applyZoom(this.value)"
+                    >
+                    <span id="zoom-label">100%</span>
+                    <button class="zoom-reset-btn" onclick="resetZoom()" title="Reset to 100%">↺</button>
+                </div>
+            </div>
+
+            <!-- Page Text — HERO -->
+            <div id="page-text"></div>
+
+            <!-- Navigation -->
+            <div id="nav-controls">
+                <button onclick="prevPage()">⏮ Prev</button>
+                <span id="page-fraction"></span>
+                <button onclick="nextPage()">Next ⏭</button>
+            </div>
+
+            <!-- Audio Controls -->
+            <div id="audio-controls">
+                <div id="audio-top">
+                    <div id="voice-selector">
+                        <label>🎙️</label>
+                        <select id="voice-choice">
+                            <option value="en-US-JennyNeural">Jenny 🇺🇸</option>
+                            <option value="en-US-GuyNeural">Guy 🇺🇸</option>
+                            <option value="en-GB-SoniaNeural">Sonia 🇬🇧</option>
+                            <option value="en-GB-RyanNeural">Ryan 🇬🇧</option>
+                            <option value="en-AU-NatashaNeural">Natasha 🇦🇺</option>
+                            <option value="en-AU-WilliamNeural">William 🇦🇺</option>
+                        </select>
+                    </div>
+                    <div id="speed-selector">
+                        <label>⚡</label>
+                        <select id="speed-choice">
+                            <option value="0.75">0.75x</option>
+                            <option value="1" selected>1x</option>
+                            <option value="1.25">1.25x</option>
+                            <option value="1.5">1.5x</option>
+                            <option value="2">2x</option>
+                        </select>
+                    </div>
+                    <div id="volume-selector">
+                        <label>🔊</label>
+                        <input type="range" id="volume-slider" min="0" max="1"
+                            step="0.1" value="1" oninput="setVolume(this.value)">
+                    </div>
+                </div>
+                <div id="audio-buttons">
+                    <button id="play-pause-btn" onclick="togglePlayPause()">▶ Play</button>
+                    <button class="btn-stop" onclick="stopAudio()">⏹ Stop</button>
+                    <button id="autoplay-btn" onclick="toggleAutoPlay()">🔁 Auto: OFF</button>
+                </div>
+            </div>
+
+            <!-- Text Actions -->
+            <div id="action-bar">
+                <span id="action-hint">Select text for actions:</span>
+                <div id="action-buttons">
+                    <button onclick="saveHighlight()">🖊️ Highlight</button>
+                    <button onclick="explainSelected()">✨ Explain</button>
+                    <button onclick="getWordMeaning()">📖 Meaning</button>
+                    <button onclick="playSelectedText()">🔊 Play From Here</button>
+                </div>
+            </div>
+
+        </div>
+        <!-- reader-panel end -->
+
+        <!-- ── RIGHT: AI Panel ── -->
+        <div id="ai-panel">
+
+            <!-- AI Panel Tabs -->
+            <div id="ai-tab-bar">
+                <button class="ai-tab active" onclick="switchAiTab('chat', this)">💬 Chat</button>
+                <button class="ai-tab" onclick="switchAiTab('explain', this)">✨ Explain</button>
+                <button class="ai-tab" onclick="switchAiTab('notes', this)">🧠 Notes</button>
+                <button class="ai-tab" onclick="switchAiTab('highlights', this)">🖊️ Saved</button>
+            </div>
+
+            <!-- Chat Tab -->
+            <div id="ai-tab-chat" class="ai-tab-content active">
+                <div id="chat-section">
+                    <p id="chat-hint">Ask anything about the book</p>
+                    <div id="chat-messages"></div>
+                    <div id="chat-input-row">
+                        <input type="text" id="chat-input"
+                            placeholder="Ask the book..."
+                            onkeypress="if(event.key==='Enter') sendChat()">
+                        <button onclick="sendChat()">➤</button>
+                    </div>
+                    <button class="btn-clear" onclick="clearChat()">🗑️ Clear chat</button>
+                </div>
+            </div>
+
+            <!-- Explain Tab -->
+            <div id="ai-tab-explain" class="ai-tab-content">
+                <div id="explain-section">
+                    <p id="explain-hint">Select text in reader, then use actions below</p>
+                    <div id="meaning-box" style="display:none">
+                        <h3>📖 Word Meaning</h3>
+                        <p id="meaning-text"></p>
+                    </div>
+                    <div id="explain-box" style="display:none">
+                        <h3>✨ Explanation</h3>
+                        <p id="explain-text"></p>
+                        <button id="explain-audio-btn" onclick="playExplanationAudio()">
+                            🔊 Listen
+                        </button>
+                    </div>
+                    <div id="explain-empty">
+                        <p>👆 Select text in the reader and click Explain or Meaning</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notes Tab -->
+            <div id="ai-tab-notes" class="ai-tab-content">
+                <div id="notes-section">
+                    <p class="panel-hint">Generate notes for current page</p>
+                    <div id="notes-buttons">
+                        <button onclick="generateNotes('summary')">📝 Summary</button>
+                        <button onclick="generateNotes('bullets')">• Bullets</button>
+                        <button onclick="generateNotes('revision')">🎯 Revision</button>
+                    </div>
+                    <div id="notes-box" style="display:none">
+                        <div id="notes-header">
+                            <span id="notes-mode-label"></span>
+                            <button id="notes-copy-btn" onclick="copyNotes()">📋 Copy</button>
+                        </div>
+                        <p id="notes-text"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Highlights Tab -->
+            <div id="ai-tab-highlights" class="ai-tab-content">
+                <div id="highlights-section">
+                    <p class="panel-hint">Your saved highlights</p>
+                    <p id="no-highlights-msg" style="color:#7a8099; font-size:14px;">
+                        No highlights yet — select text and click 🖊️ Highlight
+                    </p>
+                    <div id="highlights-list"></div>
+                </div>
+            </div>
+
+        </div>
+        <!-- ai-panel end -->
+
+    </div>
+    <!-- app-layout end -->
+
+    <script src="/static/state.js"></script>
+    <script src="/static/language.js"></script>
+    <script src="/static/reader.js"></script>
+    <script src="/static/audio.js"></script>
+    <script src="/static/ai.js"></script>
+    <script src="/static/bookmarks.js"></script>
+    <script src="/static/highlights.js"></script>
+    <script src="/static/word.js"></script>
+    <script src="/static/notes.js"></script>
+    <script src="/static/chat.js"></script>
+    <script src="/static/upload.js"></script>
+</body>
+</html>
