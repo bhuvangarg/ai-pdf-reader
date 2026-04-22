@@ -3,7 +3,7 @@ An AI-powered interactive PDF reader that transforms documents into intelligent 
 
 ---
 
-## 🚀 Project Overview
+## Project Overview
 
 This project converts static PDFs into an interactive experience where users can listen, select, and understand content using AI.  
 It combines OCR, audio generation, and intelligent querying to enhance document readability and learning.
@@ -25,7 +25,7 @@ It combines OCR, audio generation, and intelligent querying to enhance document 
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 **Backend**
 - Python (Flask)
@@ -45,7 +45,7 @@ It combines OCR, audio generation, and intelligent querying to enhance document 
 - Edge-TTS (Text-to-Speech)
 
 ---
-## 📸 Screenshots
+## Screenshots
 
 <img width="743" height="640" alt="Screenshot 2026-04-11 213816" src="https://github.com/user-attachments/assets/a2f50093-1a28-43dc-b145-661bbbfc8692" />
 <img width="734" height="683" alt="Screenshot 2026-04-11 213752" src="https://github.com/user-attachments/assets/4c28c183-6a06-4b07-ae82-37228bf5924d" />
