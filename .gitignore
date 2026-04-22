@@ -4,3 +4,5 @@ node_modules/
 *.pyc
 *.log
 venv/
+id_ed25519*
+.ipynb_checkpoints/
